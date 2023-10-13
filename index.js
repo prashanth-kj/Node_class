@@ -1,4 +1,4 @@
-//  import express from 'express';        // this is ES script module
+//  import express from 'express';        // this is ES script module add type:module in package.json
 
 const express =require('express') // this is common js module
 const AppRouters=require('./src/routes')
