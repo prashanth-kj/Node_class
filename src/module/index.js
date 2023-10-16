@@ -1,5 +1,4 @@
 const mongoose =require('mongoose');
-const DB =require('../common/db.config')
  require('dotenv').config()
 try {
       console.log(process.env.dbURL,process.env.dbName);
