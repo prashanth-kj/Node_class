@@ -1,9 +1,10 @@
  const userModel=require('../module/user');
+ const Auth = require('../common/auth.js');
 
  const getuser=async(req,res)=>{
        
       try {
-            let users=await userModel.find();
+            let users=await userModel.find({},{password:0});
             res.status(200).send({
                   message:"data fetched  sucessfully",
                   users
@@ -40,6 +41,8 @@ const create=async(req,res)=>{
             try {
                    let user =await userModel.findOne({email:req.body.email})
                   if(!user){
+                         
+                        req.body.password= await Auth.hashPassword(req.body.password);
                         await userModel.create(req.body);  
                         res.status(201).send({
                              message:"user created sucessfully",
@@ -125,10 +128,60 @@ const create=async(req,res)=>{
          }
  }
 
+const login =async(req,res)=>{
+      try {
+            let user =await userModel.findOne({email:req.body.email})
+         if(user){
+              
+             let hashCompare=await Auth.hashCompare(req.body.password,user.password);
+             if(hashCompare){
+
+                     let token=await Auth.createToken({
+                        firstname:user.firstName,
+                        lastName:user.lastName,
+                        email:user.email,
+                        role:user.role
+                     })
+
+                      res.status(200).send({
+                        message:'Login sucessfull',
+                        token
+                      })
+             }
+             else{
+                  res.status(400).send({
+                        message:'Invalid password'
+                       
+                  })
+             }
+              
+
+
+
+         }
+         else{
+            res.status(400).send({
+                  message:`Account with ${req.body.email} does not exists`
+                 
+            })
+              
+         }
+            
+      } catch (error) {
+            res.status(500).send({
+                  message:"Internal servar error",
+                  error:error.message
+            })
+      }
+}
+
+
+
  module.exports={
     getuser,
     getUserById,
     create,
     editUser,
-    deleteUser
+    deleteUser,
+    login
  }
